@@ -1,0 +1,19 @@
+{
+  "name": "study-mate-api",
+  "version": "1.0.0",
+  "description": "create a api with node express mongodb mongoose jwt bcriptjs",
+  "keywords": [
+    "node",
+    "express",
+    "mongodb",
+    "jwt",
+    "bcriptjs"
+  ],
+  "license": "ISC",
+  "author": "Polas Chandra Barmon",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js"
+  }
+}
