@@ -91,6 +91,13 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.methods.correctPassword = async function (
+  candidateCredential,
+  databaseCredential
+) {
+  return await bcrypt.compare(candidateCredential, databaseCredential);
+};
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
