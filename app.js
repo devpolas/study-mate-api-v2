@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/usersRouter");
 const friendshipRouter = require("./routes/friendshipRouter");
+const globalErrorHandler = require("./controllers/globalErrorController");
 
 // create the app
 const app = express();
@@ -29,6 +30,9 @@ app.all("/*splat", (req, res) => {
     message: `can't find ${req.originalUrl} on this server`,
   });
 });
+
+// global error handling middleware
+app.use(globalErrorHandler);
 
 // export the app from file
 module.exports = app;
