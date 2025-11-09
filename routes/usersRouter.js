@@ -10,6 +10,7 @@ router.route("/login").post(authController.login);
 
 // protected routes
 router.use(authController.protect);
+router.route("/updateMe").patch(userController.updateUser);
 router.route("/me").get(userController.me, userController.getUser);
 
 module.exports = router;
