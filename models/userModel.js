@@ -1,7 +1,13 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
+    firebaseUid: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     name: {
       type: String,
       minLength: [3, "Name must be at least 3 characters long"],
@@ -14,13 +20,33 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    authProvider: {
+      type: String,
+      enum: ["mongodb", "firebase"],
+      required: true,
+      default: "mongodb",
+    },
     password: {
       type: String,
-      required: [true, "Please provide your password!"],
+      minLength: 6,
+      required: function () {
+        return this.authProvider === "mongodb";
+      },
+      select: false,
     },
     passwordConfirm: {
       type: String,
-      required: [true, "Please provide your password!"],
+      minLength: 6,
+      required: function () {
+        return this.authProvider === "mongodb";
+      },
+      validate: {
+        validator: function (val) {
+          // Only run if password is being modified
+          return val === this.password;
+        },
+        message: "Passwords are not the same!",
+      },
     },
     role: {
       type: String,
@@ -46,10 +72,24 @@ const userSchema = new mongoose.Schema(
       default: "beginner",
     },
     location: String,
-    ratingAverage: Number,
+    ratingAverage: { type: Number, default: 0, min: 0, max: 5 },
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  const isFirebase =
+    this.authProvider !== "mongodb" && !this.isModified("password");
+  if (isFirebase) {
+    return next();
+  }
+  if (!this.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(12);
+  const hasPassword = await bcrypt.hash(this.password, salt);
+  this.password = hasPassword;
+  this.passwordConfirm = undefined;
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 
