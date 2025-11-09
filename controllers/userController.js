@@ -22,3 +22,48 @@ exports.getUser = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+function filterObj(obj, ...allowedFields) {
+  const newObject = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) {
+      newObject[el] = obj[el];
+    }
+  });
+
+  return newObject;
+}
+
+exports.updateUser = catchAsync(async (req, res, next) => {
+  if (req.body.password || req.body.confirmPassword) {
+    return next(
+      new AppError(
+        "This route is not for password updates. Please use /api/v1/users/updatePassword.",
+        400
+      )
+    );
+  }
+  const id = req.params.id;
+  const updates = req.body;
+
+  const filterBody = filterObj(
+    updates,
+    "name",
+    "profileImage",
+    "subject",
+    "studyMode",
+    "availability",
+    "experienceLevel",
+    "location"
+  );
+
+  const updatedUser = await User.findByIdAndUpdate(id, filterBody, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "user updated successfully!",
+  });
+});
