@@ -3,7 +3,7 @@ const friendshipSchema = new mongoose.Schema({
   recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   status: {
     type: String,
-    enum: ["pending", "accepted", "rejected"],
+    enum: ["pending", "accepted", "rejected", "Blocked"],
     default: "pending",
   },
   createdAt: { type: Date, default: Date.now },
