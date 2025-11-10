@@ -20,7 +20,7 @@ const friendshipSchema = new mongoose.Schema(
     createdAt: { type: Date, default: Date.now },
     updatedAt: Date,
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 friendshipSchema.index({ requester: 1, recipient: 1 }), { unique: true };
