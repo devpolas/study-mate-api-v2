@@ -14,7 +14,7 @@ const friendshipSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "blocked", "normal"],
+      enum: ["pending", "accepted", "rejected", "blocked"],
       default: "pending",
     },
     createdAt: { type: Date, default: Date.now },
@@ -23,7 +23,7 @@ const friendshipSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-friendshipSchema.index({ requester: 1, recipient: 1 }), { unique: true };
+friendshipSchema.index({ requester: 1, recipient: 1 }, { unique: true });
 
 friendshipSchema.pre("/^find/", function (next) {
   this.populate("requester").populate("recipient");

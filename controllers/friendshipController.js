@@ -125,15 +125,11 @@ exports.cancelFriendRequest = catchAsync(async (req, res, next) => {
 exports.unfriend = catchAsync(async (req, res, next) => {
   const { requesterId, recipientId } = req.body;
 
-  const friendship = await Friendship.findOneAndUpdate(
-    {
-      requester: requesterId,
-      recipient: recipientId,
-      status: "accepted",
-    },
-    { status: "normal" },
-    { new: true }
-  );
+  const friendship = await Friendship.findOneAndDelete({
+    requester: requesterId,
+    recipient: recipientId,
+    status: "accepted",
+  });
   if (!friendship) {
     return next(new AppError("No pending friend request found", 404));
   }
