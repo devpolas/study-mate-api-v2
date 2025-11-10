@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === "development") {
 // routers
 app.use("/", (req, res) => {
   res.status(200).json({
-    status: success,
+    status: "success",
     message: "Hello from server!",
   });
 });
