@@ -4,6 +4,17 @@ const User = require("./../models/userModel");
 const jwt = require("jsonwebtoken");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
+const firebaseAdmin = require("firebase-admin");
+
+const SDK_API_KEY = Buffer.from(process.env.FIREBASE_SDK_API_KEY).toString(
+  "utf-8"
+);
+
+const serviceAccount = JSON.parse(SDK_API_KEY);
+
+firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert(serviceAccount),
+});
 
 function signJsonWebToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -96,5 +107,18 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 // social login
 exports.socialLogin = catchAsync(async (req, res, next) => {
-  const { fireBaseUid } = req.body;
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return next(new AppError("Please login first", 401));
+  }
+  const decode = await firebaseAdmin.auth().verifyIdToken(token);
+  console.log(decode);
 });
