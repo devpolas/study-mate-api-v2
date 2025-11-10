@@ -11,8 +11,9 @@ router.route("/refresh_token").post(authController.refreshToken);
 
 // protected routes
 router.use(authController.protect);
-router.route("/logout").get(authController.logout);
-router.route("/updateMe").patch(userController.updateUser);
+router.route("/").get(userController.getAllUser);
 router.route("/me").get(userController.me, userController.getUser);
+router.route("/updateMe").patch(userController.updateUser);
+router.route("/logout").get(authController.logout);
 
 module.exports = router;

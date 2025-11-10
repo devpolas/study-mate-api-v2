@@ -7,6 +7,21 @@ exports.me = catchAsync(async (req, res, next) => {
   next();
 });
 
+exports.getAllUser = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+
+  if (!users) {
+    return next(new AppError("No user found with that ID", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      users,
+    },
+  });
+});
+
 exports.getUser = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const user = await User.findById(id);
