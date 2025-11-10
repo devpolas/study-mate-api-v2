@@ -131,7 +131,7 @@ exports.unfriend = catchAsync(async (req, res, next) => {
       recipient: recipientId,
       status: "accepted",
     },
-    { status: "pending" },
+    { status: "normal" },
     { new: true }
   );
   if (!friendship) {
