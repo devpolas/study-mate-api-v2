@@ -16,7 +16,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:5173","https://study-mate1.netlify.app"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
