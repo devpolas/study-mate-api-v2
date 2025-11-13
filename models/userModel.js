@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
       },
       default: "student",
     },
-    profileImage: String,
+    image: String,
     subject: String,
     studyMode: {
       type: Boolean,
