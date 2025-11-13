@@ -36,6 +36,8 @@ npm install
 
 ```
 
+# environment-variables
+
 2. Set environment variables (see below).
 
 ```
@@ -66,6 +68,8 @@ FIREBASE_SDK_API_KEY=your_base64_encoded_firebase_sdk_json
 DATABASE=mongodb://localhost:27017/study-mate
 ```
 
+# installation
+
 3. Installation
 
 ```
@@ -78,6 +82,8 @@ Start in development mode:
 
 npm run dev
 ```
+
+# api-routes
 
 4. API Routes
 
@@ -92,6 +98,8 @@ POST	/users/social-login	Login with Firebase token	Public
 POST	/users/refresh_token	Refresh access JWT using cookie	Public
 POST	/users/logout	Logout user and invalidate refresh token	Protected
 ```
+
+# authentication
 
 5. Signup Example
 
@@ -113,6 +121,8 @@ GET	/users/me	Get current authenticated user	Protected
 GET	/users/:id	Get a user by ID	Protected
 PATCH	/users/updateMe	Update authenticated user profile	Protected
 ```
+
+# users
 
 6. Filtering & Sorting
 
@@ -140,6 +150,8 @@ Content-Type: application/json
   "availability": "Evenings"
 }
 ```
+
+# friendships
 
 9. Friendship Routes
 
@@ -185,6 +197,8 @@ Content-Type: application/json
 }
 ```
 
+# error-handling
+
 13. Error Handling
 
 ```
@@ -208,6 +222,8 @@ Errors are returned in the following format:
 500 → Internal Server Error
 ```
 
+# cors
+
 15. CORS
 
 ```
@@ -221,6 +237,8 @@ Supports credentials (cookies)
 
 Standard HTTP methods allowed
 ```
+
+# testing
 
 16. Testing
 
@@ -253,6 +271,8 @@ Send friend requests → accept / unfriend other users
 
 Refresh tokens → automatically via /refresh_token
 ```
+
+# notes
 
 17. License
 
