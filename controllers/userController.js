@@ -104,7 +104,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   const filterBody = filterObj(
     updates,
     "name",
-    "profileImage",
+    "image",
     "subject",
     "studyMode",
     "availability",
