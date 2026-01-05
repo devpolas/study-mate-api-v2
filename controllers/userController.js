@@ -24,56 +24,61 @@ exports.getMe = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllUser = catchAsync(async (req, res, next) => {
-  const queryObj = { ...req.query };
+  let {
+    query = "",
+    page = 1,
+    limit = 10,
+    sort,
+    role,
+    subject,
+    studyMode,
+    experienceLevel,
+  } = req.query;
 
-  const excludeFields = ["page", "limit", "sort", "fields"];
+  page = parseInt(page, 10);
+  limit = parseInt(limit, 10);
 
-  excludeFields.forEach((el) => delete queryObj[el]);
+  const filter = {};
 
-  let queryStr = JSON.stringify(queryObj);
-
-  queryStr = queryStr.replace(
-    /\b(gte|gt|lte|lt|regex|options)\b/g,
-    (match) => `$${match}`
-  );
-
-  let query = User.find(JSON.parse(queryStr));
-
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(",").join(" ");
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort("-createdAt");
+  // Search by query (name, email, location)
+  if (query) {
+    const searchRegex = new RegExp(query, "i");
+    filter.$or = [
+      { name: searchRegex },
+      { email: searchRegex },
+      { location: searchRegex },
+    ];
   }
 
-  if (req.query.fields) {
-    const fields = req.query.fields.split(",").join(" ");
-    query = query.select(fields);
-  } else {
-    query = query.select("-__v");
+  // Filters
+  if (role) filter.role = role;
+  if (subject) filter.subject = { $regex: new RegExp(subject, "i") };
+  if (studyMode !== undefined) filter.studyMode = studyMode === "true";
+  if (experienceLevel) filter.experienceLevel = experienceLevel;
+
+  const totalDocs = await User.countDocuments(filter);
+  const totalPages = Math.ceil(totalDocs / limit);
+
+  let userQuery = User.find(filter)
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  if (sort) {
+    userQuery = userQuery.sort(sort.split(",").join(" "));
   }
 
-  const page = parseInt(req.query.page, 11) || 1;
-  const limit = parseInt(req.query.limit, 11) || 11;
-  const skip = (page - 1) * limit;
-  query = query.skip(skip).limit(limit);
-
-  const users = await query;
-
-  if (!users || users.length === 0) {
-    return next(new AppError("No user found!", 404));
-  }
-
-  const totalUsers = await User.countDocuments(JSON.parse(queryStr));
+  const users = await userQuery;
 
   res.status(200).json({
     status: "success",
-    results: users.length,
+    message:
+      users.length === 0
+        ? "No user found matching your criteria"
+        : "Users fetched successfully",
     page,
-    totalPages: Math.ceil(totalUsers / limit),
-    data: {
-      users,
-    },
+    totalPages,
+    total: totalDocs,
+    data: { users },
   });
 });
 

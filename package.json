@@ -1,6 +1,6 @@
 {
   "name": "study-mate-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "create a api with node express mongodb mongoose jwt bcriptjs",
   "keywords": [
     "node",
