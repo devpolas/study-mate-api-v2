@@ -38,35 +38,40 @@ function setJwtToken(user, statusCode, res) {
 }
 
 // handel signup
-
 exports.signup = catchAsync(async (req, res, next) => {
-  const existingUser = await User.findOne({
-    email: req.body.email,
-    authProvider: "firebase",
-  });
+  const { name, email, password, passwordConfirm, birthdate } = req.body;
 
-  console.log(req.body.name);
-
-  if (existingUser) {
+  if (!password || !passwordConfirm) {
     return next(
-      new AppError(
-        "This email is already registered using Firebase social login. Please sign in with that method.",
-        400
-      )
+      new AppError("Please provide password and passwordConfirm", 400)
     );
   }
 
+  if (password !== passwordConfirm) {
+    return next(new AppError("Passwords do not match!", 400));
+  }
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(
+      new AppError("This email is already registered. Please login.", 400)
+    );
+  }
+
+  console.log(email);
+
   const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    birthdate: req.body.birthdate,
+    name,
+    email,
+    password,
+    passwordConfirm,
+    birthdate,
     authProvider: "mongodb",
   });
 
-  // hidden the password fields
-  newUser.password = undefined;
+  console.log(newUser);
+
+  newUser.password = undefined; // hide password
 
   setJwtToken(newUser, 201, res);
 });

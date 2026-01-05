@@ -37,17 +37,19 @@ const userSchema = new mongoose.Schema(
     },
     passwordConfirm: {
       type: String,
-      minLength: 6,
-      required: function () {
-        return this.authProvider === "mongodb";
-      },
-      validate: {
-        validator: function (val) {
-          // Runs only on create/save
-          return val === this.password;
+      required: [
+        function () {
+          return this.authProvider === "mongodb";
         },
-        message: "Passwords are not the same!",
+        "Please confirm your password",
+      ],
+      validate: {
+        validator: function (el) {
+          return el === this.password;
+        },
+        message: "Passwords do not match!",
       },
+      select: false, // optional: prevent storing in DB
     },
     role: {
       type: String,
@@ -82,7 +84,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please Provide Your Birthdate!"],
     },
-    passwordChangedAt: Date,
+    passwordChangedAt: {
+      type: Date,
+    },
 
     slug: { type: String, index: true },
   },
@@ -100,6 +104,7 @@ userSchema.virtual("sentRequests", {
   localField: "_id",
 });
 
+// generate slug
 userSchema.pre("save", function (next) {
   if (this.isModified("name")) {
     this.slug = slugify(this.name, { lower: true, strict: true });
@@ -107,18 +112,22 @@ userSchema.pre("save", function (next) {
   next();
 });
 
+// 1 Hash password if changed
 userSchema.pre("save", async function (next) {
   if (this.authProvider !== "mongodb") return next();
   if (!this.isModified("password")) return next();
+
+  // ✅ Hash password first
   const salt = await bcrypt.genSalt(12);
-  const hasPassword = await bcrypt.hash(this.password, salt);
-  this.password = hasPassword;
+  this.password = await bcrypt.hash(this.password, salt);
+
+  // ✅ Remove passwordConfirm AFTER validation is done
   this.passwordConfirm = undefined;
   next();
 });
 
+// 2 Update passwordChangedAt after hashing
 userSchema.pre("save", function (next) {
-  // if any user is created or password is modified then update the password changeAt field
   if (!this.isModified("password") || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
   next();

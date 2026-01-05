@@ -24,38 +24,53 @@ exports.getMe = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllUser = catchAsync(async (req, res, next) => {
-  // 1. Copy req.query
   const queryObj = { ...req.query };
 
-  // Check if slug filter exists
-  if (queryObj.slug) {
-    queryObj.slug = { $regex: `^${queryObj.slug}`, $options: "i" };
-    // ^ matches the beginning, 'i' is case-insensitive
+  const excludeFields = ["page", "limit", "sort", "fields"];
+
+  excludeFields.forEach((el) => delete queryObj[el]);
+
+  let queryStr = JSON.stringify(queryObj);
+
+  queryStr = queryStr.replace(
+    /\b(gte|gt|lte|lt|regex|options)\b/g,
+    (match) => `$${match}`
+  );
+
+  let query = User.find(JSON.parse(queryStr));
+
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort("-createdAt");
   }
 
-  // 2. Extract sort parameter
-  const sortBy = queryObj.sort;
-  delete queryObj.sort;
-
-  // 3. Build the Mongoose query
-  let query = User.find(queryObj);
-
-  // 4. Apply sorting if provided
-  if (sortBy) {
-    // Allow comma-separated fields: ?sort=name,-createdAt
-    const sortString = sortBy.split(",").join(" ");
-    query = query.sort(sortString);
+  if (req.query.fields) {
+    const fields = req.query.fields.split(",").join(" ");
+    query = query.select(fields);
+  } else {
+    query = query.select("-__v");
   }
 
-  // 5. Execute the query
+  const page = parseInt(req.query.page, 11) || 1;
+  const limit = parseInt(req.query.limit, 11) || 11;
+  const skip = (page - 1) * limit;
+  query = query.skip(skip).limit(limit);
+
   const users = await query;
 
   if (!users || users.length === 0) {
-    return next(new AppError("No user Found!", 404));
+    return next(new AppError("No user found!", 404));
   }
+
+  const totalUsers = await User.countDocuments(JSON.parse(queryStr));
 
   res.status(200).json({
     status: "success",
+    results: users.length,
+    page,
+    totalPages: Math.ceil(totalUsers / limit),
     data: {
       users,
     },
