@@ -57,9 +57,7 @@ PORT=3000
 
 # JWT Secrets
 ACCESS_JWT_SECRET=your_access_secret
-ACCESS_JWT_EXPIRES_IN=15m
-REFRESH_JWT_SECRET=your_refresh_secret
-REFRESH_JWT_EXPIRES_IN=30d
+ACCESS_JWT_EXPIRES_IN=30d
 
 # Firebase SDK (base64 encoded JSON)
 FIREBASE_SDK_API_KEY=your_base64_encoded_firebase_sdk_json
@@ -88,15 +86,13 @@ npm run dev
 4. API Routes
 
 ```
-Base URL: /api/v1
+Base URL: /api/v2
 
 Authentication Routes
 Method	Route	Description	Access
 POST	/users/signup	Register a new user with email/password	Public
 POST	/users/login	Login with email/password	Public
 POST	/users/social-login	Login with Firebase token	Public
-POST	/users/refresh_token	Refresh access JWT using cookie	Public
-POST	/users/logout	Logout user and invalidate refresh token	Protected
 ```
 
 # authentication
@@ -111,7 +107,8 @@ Content-Type: application/json
   "name": "John Doe",
   "email": "john@example.com",
   "password": "password123",
-  "passwordConfirm": "password123"
+  "passwordConfirm": "password123",
+  "birthdate": "YYYY-MM-DD"
 }
 
 User Routes
@@ -129,19 +126,19 @@ PATCH	/users/updateMe	Update authenticated user profile	Protected
 ```
 Filter by slug:
 
-GET /api/v1/users?slug=developer
+GET /api/v2/users?query=developer
 ```
 
 7. Sort by fields (comma-separated):
 
 ```
-GET /api/v1/users?sort=name,-ratingAverage
+GET /api/v2/users?sort=name,-ratingAverage
 ```
 
 8. Update User Example
 
 ```
-PATCH /api/v1/users/updateMe
+PATCH /api/v2/users/updateMe
 Content-Type: application/json
 
 {
@@ -167,7 +164,7 @@ POST	/friendships/unfriend	Remove an existing friend	Protected
 10. Send Friend Request Example
 
 ```
-POST /api/v1/friendships/send-request
+POST /api/v2/friendships/send-request
 Content-Type: application/json
 
 {
@@ -178,7 +175,7 @@ Content-Type: application/json
 11. Accept Friend Request Example
 
 ```
-POST /api/v1/friendships/accept-request
+POST /api/v2/friendships/accept-request
 Content-Type: application/json
 
 {
@@ -189,7 +186,7 @@ Content-Type: application/json
 12. Unfriend Example
 
 ```
-POST /api/v1/friendships/unfriend
+POST /api/v2/friendships/unfriend
 Content-Type: application/json
 
 {
@@ -232,6 +229,8 @@ Allowed origins:
 http://localhost:5173
 
 https://study-mate1.netlify.app
+
+https://study-mate-client-v2.netlify.app/
 
 Supports credentials (cookies)
 
